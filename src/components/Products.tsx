@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import { useCart, Product } from '../context/CartContext';
 
 const categories = ['Toate', 'Pâine', 'Patiserie', 'Cofetărie', 'Speciale'];
 
-const products = [
+const products: Product[] = [
   {
     id: 1,
     name: 'Croissant cu Unt',
@@ -51,6 +52,7 @@ const products = [
 
 export default function Products() {
   const [activeCategory, setActiveCategory] = useState('Toate');
+  const { addToCart } = useCart();
 
   const filteredProducts = activeCategory === 'Toate' 
     ? products 
@@ -96,45 +98,51 @@ export default function Products() {
           ))}
         </div>
 
-        <motion.div 
-          layout
+        <div 
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          <AnimatePresence mode="popLayout">
-            {filteredProducts.map((product) => (
-              <motion.div
-                layout
-                key={product.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4 }}
-                className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500"
-              >
-                <div className="aspect-square overflow-hidden relative">
-                  <img
-                    src={product.image}
-                    alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
-                    {product.category}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeCategory}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="contents"
+            >
+              {filteredProducts.map((product) => (
+                <div
+                  key={product.id}
+                  className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500"
+                >
+                  <div className="aspect-square overflow-hidden relative">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      referrerPolicy="no-referrer"
+                    />
+                    <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider">
+                      {product.category}
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-serif mb-2">{product.name}</h3>
+                    <div className="flex items-center justify-between">
+                      <span className="text-patisserie-accent font-medium">{product.price}</span>
+                      <button 
+                        onClick={() => addToCart(product)}
+                        className="text-xs uppercase tracking-widest font-bold hover:text-patisserie-accent transition-colors"
+                      >
+                        Adaugă în Coș
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div className="p-6">
-                  <h3 className="text-xl font-serif mb-2">{product.name}</h3>
-                  <div className="flex items-center justify-between">
-                    <span className="text-patisserie-accent font-medium">{product.price}</span>
-                    <button className="text-xs uppercase tracking-widest font-bold hover:text-patisserie-accent transition-colors">
-                      Adaugă în Coș
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+              ))}
+            </motion.div>
           </AnimatePresence>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -2,10 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { useCart } from '../context/CartContext';
 
-export default function Navbar() {
+interface NavbarProps {
+  onOpenCheckout: () => void;
+}
+
+export default function Navbar({ onOpenCheckout }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { cartCount } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,11 +55,20 @@ export default function Navbar() {
         </div>
 
         <div className="flex items-center gap-4">
-          <button className="p-2 hover:bg-patisserie-cream rounded-full transition-colors relative">
+          <button 
+            onClick={onOpenCheckout}
+            className="p-2 hover:bg-patisserie-cream rounded-full transition-colors relative"
+          >
             <ShoppingBag className="w-5 h-5" />
-            <span className="absolute top-0 right-0 w-4 h-4 bg-patisserie-accent text-white text-[10px] flex items-center justify-center rounded-full">
-              0
-            </span>
+            {cartCount > 0 && (
+              <motion.span 
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="absolute top-0 right-0 w-4 h-4 bg-patisserie-accent text-white text-[10px] flex items-center justify-center rounded-full"
+              >
+                {cartCount}
+              </motion.span>
+            )}
           </button>
           <button
             className="md:hidden p-2 hover:bg-patisserie-cream rounded-full transition-colors"
