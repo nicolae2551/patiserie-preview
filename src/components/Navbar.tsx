@@ -36,9 +36,12 @@ export default function Navbar({ onOpenCheckout }: NavbarProps) {
         isScrolled ? 'bg-white/80 backdrop-blur-md shadow-sm py-3' : 'bg-transparent'
       )}
     >
-      <div className="max-w-7xl mx-auto flex items-center justify-between">
+      <div className={cn(
+        "max-w-7xl mx-auto flex items-center justify-between transition-colors duration-500",
+        isScrolled ? "text-patisserie-ink" : "text-white"
+      )}>
         <div className="flex items-center gap-8">
-          <a href="#" className="text-2xl md:text-3xl font-serif font-bold tracking-tight text-patisserie-ink">
+          <a href="#" className="text-2xl md:text-3xl font-serif font-bold tracking-tight">
             DENCOPAN
           </a>
           <div className="hidden md:flex items-center gap-6">
@@ -57,7 +60,10 @@ export default function Navbar({ onOpenCheckout }: NavbarProps) {
         <div className="flex items-center gap-4">
           <button 
             onClick={onOpenCheckout}
-            className="p-2 hover:bg-patisserie-cream rounded-full transition-colors relative"
+            className={cn(
+              "p-2 rounded-full transition-colors relative",
+              isScrolled ? "hover:bg-patisserie-cream" : "hover:bg-white/10"
+            )}
           >
             <ShoppingBag className="w-5 h-5" />
             {cartCount > 0 && (
@@ -71,7 +77,10 @@ export default function Navbar({ onOpenCheckout }: NavbarProps) {
             )}
           </button>
           <button
-            className="md:hidden p-2 hover:bg-patisserie-cream rounded-full transition-colors"
+            className={cn(
+              "md:hidden p-2 rounded-full transition-colors",
+              isScrolled ? "hover:bg-patisserie-cream" : "hover:bg-white/10"
+            )}
             onClick={() => setIsMobileMenuOpen(true)}
           >
             <Menu className="w-6 h-6" />
