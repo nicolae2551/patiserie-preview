@@ -32,7 +32,7 @@ const products: Product[] = [
     name: 'Plăcintă cu Brânză',
     category: 'Patiserie',
     price: '8.00 RON',
-    image: 'https://images.unsplash.com/photo-1608500218890-c5f139f1627a?q=80&w=1974&auto=format&fit=crop',
+    image: 'https://images.unsplash.com/photo-1562007908-859b4ba9a1a2?q=80&w=1974&auto=format&fit=crop',
   },
   {
     id: 5,
