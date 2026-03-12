@@ -12,7 +12,7 @@ export default function Hero() {
           className="w-full h-full object-cover scale-105"
           referrerPolicy="no-referrer"
         />
-        <div className="absolute inset-0 bg-black/30" />
+        <div className="absolute inset-0 bg-black/50" />
       </div>
 
       <div className="relative z-10 text-center px-6 max-w-4xl">
