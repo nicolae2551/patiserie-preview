@@ -20,6 +20,46 @@ export default function App() {
     restDelta: 0.001
   });
 
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState('');
+
+  const handleSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!email || !/^\S+@\S+\.\S+$/.test(email)) {
+      setStatus('error');
+      setMessage('Te rugăm să introduci o adresă de email validă.');
+      return;
+    }
+
+    setStatus('loading');
+    try {
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setStatus('success');
+        setMessage('Mulțumim pentru abonare!');
+        setEmail('');
+      } else {
+        setStatus('error');
+        setMessage(data.error || 'A apărut o eroare. Te rugăm să încerci din nou.');
+      }
+    } catch (error) {
+      setStatus('error');
+      setMessage('Eroare de conexiune. Te rugăm să încerci din nou.');
+    }
+  };
+
   useEffect(() => {
     // Simulate initial loading
     const timer = setTimeout(() => {
@@ -94,15 +134,30 @@ export default function App() {
                 viewport={{ once: true }}
                 transition={{ delay: 0.2 }}
                 className="flex flex-col md:flex-row gap-4"
-                onSubmit={(e) => e.preventDefault()}
+                onSubmit={handleSubscribe}
               >
-                <input
-                  type="email"
-                  placeholder="Adresa ta de email"
-                  className="flex-1 px-8 py-4 rounded-full bg-white border-none focus:ring-2 focus:ring-patisserie-accent outline-none text-patisserie-ink"
-                />
-                <button className="px-10 py-4 bg-patisserie-ink text-white rounded-full uppercase tracking-widest text-sm font-bold hover:bg-patisserie-accent transition-all duration-300">
-                  Abonează-te
+                <div className="flex-1 flex flex-col gap-2">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="Adresa ta de email"
+                    className="w-full px-8 py-4 rounded-full bg-white border-none focus:ring-2 focus:ring-patisserie-accent outline-none text-patisserie-ink"
+                    disabled={status === 'loading'}
+                  />
+                  {status === 'error' && (
+                    <p className="text-red-500 text-sm mt-2 text-left px-4">{message}</p>
+                  )}
+                  {status === 'success' && (
+                    <p className="text-green-600 text-sm mt-2 text-left px-4 font-bold">{message}</p>
+                  )}
+                </div>
+                <button 
+                  type="submit"
+                  disabled={status === 'loading'}
+                  className="px-10 py-4 bg-patisserie-ink text-white rounded-full uppercase tracking-widest text-sm font-bold hover:bg-patisserie-accent transition-all duration-300 disabled:opacity-50 h-fit"
+                >
+                  {status === 'loading' ? 'Se trimite...' : 'Abonează-te'}
                 </button>
               </motion.form>
             </div>
