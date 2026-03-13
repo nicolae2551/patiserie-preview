@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, Minus, Trash2, ArrowLeft, CreditCard, Truck, CheckCircle2, Package, MapPin, Phone, Mail, User } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ArrowLeft, CreditCard, Truck, CheckCircle2, Package, MapPin, Phone, Mail, User, Loader2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { cn } from '../lib/utils';
+import { db } from '../firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 interface CheckoutPageProps {
   onClose: () => void;
@@ -14,6 +16,8 @@ type CheckoutStep = 'cart' | 'details' | 'success';
 export default function CheckoutPage({ onClose }: CheckoutPageProps) {
   const { cart, removeFromCart, updateQuantity, totalPrice, clearCart } = useCart();
   const [step, setStep] = useState<CheckoutStep>('cart');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -28,12 +32,39 @@ export default function CheckoutPage({ onClose }: CheckoutPageProps) {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep('success');
-    setTimeout(() => {
-      clearCart();
-    }, 500);
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await addDoc(collection(db, 'orders'), {
+        customerName: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        paymentMethod: formData.paymentMethod,
+        items: cart.map(item => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity
+        })),
+        totalPrice: finalTotal,
+        createdAt: serverTimestamp(),
+      });
+
+      setStep('success');
+      setTimeout(() => {
+        clearCart();
+      }, 500);
+    } catch (err) {
+      console.error("Order submission error:", err);
+      setError("A apărut o eroare la plasarea comenzii. Te rugăm să încerci din nou.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const shippingCost = 15;
@@ -222,11 +253,20 @@ export default function CheckoutPage({ onClose }: CheckoutPageProps) {
                       <span>{finalTotal.toFixed(2)} RON</span>
                     </div>
                   </div>
+                  {error && (
+                    <p className="text-red-400 text-sm mb-4 text-center">{error}</p>
+                  )}
                   <button 
                     type="submit"
-                    className="w-full py-4 bg-patisserie-accent text-white rounded-full uppercase tracking-widest text-sm font-bold hover:bg-white hover:text-patisserie-ink transition-all"
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-patisserie-accent text-white rounded-full uppercase tracking-widest text-sm font-bold hover:bg-white hover:text-patisserie-ink transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   >
-                    Plasează Comanda
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        Se procesează...
+                      </>
+                    ) : 'Plasează Comanda'}
                   </button>
                 </div>
               </div>

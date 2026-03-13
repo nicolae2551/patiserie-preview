@@ -9,6 +9,8 @@ import LoadingScreen from './components/LoadingScreen';
 import CheckoutPage from './components/CheckoutPage';
 import { CartProvider } from './context/CartContext';
 import { motion, useScroll, useSpring, AnimatePresence } from 'motion/react';
+import { db } from './firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -36,25 +38,16 @@ export default function App() {
 
     setStatus('loading');
     try {
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email }),
+      await addDoc(collection(db, 'subscribers'), {
+        email,
+        createdAt: serverTimestamp(),
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        setStatus('success');
-        setMessage('Mulțumim pentru abonare!');
-        setEmail('');
-      } else {
-        setStatus('error');
-        setMessage(data.error || 'A apărut o eroare. Te rugăm să încerci din nou.');
-      }
+      setStatus('success');
+      setMessage('Mulțumim pentru abonare!');
+      setEmail('');
     } catch (error) {
+      console.error("Subscription error:", error);
       setStatus('error');
       setMessage('Eroare de conexiune. Te rugăm să încerci din nou.');
     }
